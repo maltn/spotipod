@@ -1,14 +1,16 @@
 import { k } from "@tauri-apps/api/event-2a9960e7";
+import _ from "lodash";
 import { useEffect, useRef, useState } from "react";
 import { IItem } from "../utility/interfaces";
-import { findNestedObj, updateNestedByIdentifier } from "../utility/utility";
+import {
+  findNestedObj,
+  findParent,
+  updateNestedByIdentifier,
+} from "../utility/utility";
 
 const Menu = () => {
   const [contentState, _setContentState] = useState<IItem>({
     name: "Top",
-    selected: false,
-    hover: true,
-    type: "parent",
     items: [
       {
         name: "Playlists",
@@ -16,118 +18,95 @@ const Menu = () => {
           {
             name: "Discover Weekly",
             items: [
-              { name: "Song 1", hover: true, type: "song" },
-              { name: "Song 2", hover: false, type: "song" },
-              { name: "Song 3", hover: false, type: "song" },
+              { name: "Song 1" },
+              { name: "Song 2" },
+              { name: "Song 3" },
+              { name: "Song 4" },
+              { name: "Song 5" },
+              { name: "Song 6" },
+              { name: "Song 7" },
+              { name: "Song 8" },
+              { name: "Song 9" },
+              { name: "Song 10" },
+              { name: "Song 11" },
+              { name: "Song 12" },
+              { name: "Song 13" },
+              { name: "Song 14" },
+              { name: "Song 15" },
+              { name: "Song 16" },
+              { name: "Song 17" },
+              { name: "Song 18" },
+              { name: "Song 19" },
+              { name: "Song 20" },
             ],
-            hover: true,
-            type: "playlist",
           },
           {
             name: "Indie",
-            items: [
-              { name: "Song 1", hover: true, type: "song" },
-              { name: "Song 2", hover: false, type: "song" },
-              { name: "Song 3", hover: false, type: "song" },
-            ],
-            hover: false,
-            type: "playlist",
+            items: [{ name: "Song 1" }, { name: "Song 2" }, { name: "Song 3" }],
           },
           {
             name: "Alternative",
-            items: [
-              { name: "Song 1", hover: true, type: "song" },
-              { name: "Song 2", hover: false, type: "song" },
-              { name: "Song 3", hover: false, type: "song" },
-            ],
-            hover: false,
-            type: "playlist",
+            items: [{ name: "Song 1" }, { name: "Song 2" }, { name: "Song 3" }],
           },
           {
             name: "Rap",
-            items: [
-              { name: "Song 1", hover: true, type: "song" },
-              { name: "Song 2", hover: false, type: "song" },
-              { name: "Song 3", hover: false, type: "song" },
-            ],
-            hover: false,
-            type: "playlist",
+            items: [{ name: "Song 1" }, { name: "Song 2" }, { name: "Song 3" }],
           },
           {
             name: "Kpop",
-            items: [
-              { name: "Song 1", hover: true, type: "song" },
-              { name: "Song 2", hover: false, type: "song" },
-              { name: "Song 3", hover: false, type: "song" },
-            ],
-            hover: false,
-            type: "playlist",
+            items: [{ name: "Song 1" }, { name: "Song 2" }, { name: "Song 3" }],
           },
         ],
-        selected: false,
-        hover: true,
-        type: "parent",
       },
       {
         name: "Settings",
-        items: [{ name: "Fetch data", type: "button", hover: true }],
-        selected: true,
-        hover: false,
-        type: "parent",
+        items: [{ name: "Fetch data" }],
       },
     ],
   });
 
-  // const [contentRenderState, _setContentRenderState] = useState(contentState);
-
-  const playlists = useRef([
-    "Discover Weekly",
-    "Indie",
-    "Alternative",
-    "Rap",
-    "Kpop",
-  ]);
-  const contentStateRef = useRef(contentState);
-  // const contentRenderStateRef = useRef(contentRenderState);
-
-  const setContentState = (data) => {
-    contentStateRef.current = data;
-    _setContentState(data);
+  const [contentRenderer, _setContentRenderer] = useState<IItem>(contentState);
+  const contentRendererRef = useRef(contentRenderer);
+  const [hover, _setHover] = useState(0);
+  const hoverRef = useRef(hover);
+  const setHover = (payload: number) => {
+    hoverRef.current = payload;
+    _setHover(payload);
+  };
+  const setContentRenderer = (payload: IItem) => {
+    contentRendererRef.current = payload;
+    _setContentRenderer(payload);
   };
 
-  // const setContentRenderState = (data) => {
-  //   contentRenderStateRef.current = data;
-  //   _setContentRenderState(data);
-  // };
-
   const inputManager = (e: KeyboardEvent) => {
-    const obj = findNestedObj(contentStateRef.current, "selected", true);
     if (e.key == "w" || e.key == "W") {
       //UP
+      if (hoverRef.current - 1 < 0) {
+        setHover(contentRendererRef.current.items.length - 1);
+      } else {
+        setHover(hoverRef.current - 1);
+      }
     }
     if (e.key == "s" || e.key == "S") {
       //DOWN
-      // for (let i = 0; i < obj.items.length; i++) {
-      //   if (obj.items[i + 1]) {
-      //     obj.items[i + 1].hover = true;
-      //   } else {
-      //     obj.items[0].hover = true;
-      //   }
-      //   obj.items[i].hover = false;
-      // }
-      obj.items[0].name = "FUCK";
-      let copy = { ...contentStateRef.current };
-      let arifhj = { ...contentStateRef.current };
-      console.log(JSON.stringify(obj));
-      console.log(JSON.stringify(copy));
-      const resObj = updateNestedByIdentifier(obj.name, obj, copy);
-      console.log(JSON.stringify(copy) == JSON.stringify(arifhj));
+      if (hoverRef.current + 1 > contentRendererRef.current.items.length - 1) {
+        setHover(0);
+      } else {
+        setHover(hoverRef.current + 1);
+      }
     }
     if (e.key == "Enter") {
       //SELECT
+      if (!contentRendererRef.current.items[hoverRef.current].items) return;
+      setContentRenderer(contentRendererRef.current.items[hoverRef.current]);
+      setHover(0);
     }
     if (e.key == "Backspace") {
       //BACK
+      if (contentRendererRef.current.name == "Top") return;
+      const result = findParent(contentState, contentRendererRef.current);
+      setContentRenderer(result);
+      setHover(0);
     }
   };
 
@@ -146,22 +125,18 @@ const Menu = () => {
 
   return (
     <div>
-      {getRenderObj(contentStateRef.current).map((data, i) => {
+      {contentRenderer.items.map((data, i) => {
         return (
           <span
             key={i}
             className={`block pl-1 mr-1 rounded-sm ${
-              data.hover && "bg-green-500 text-black"
-            }`}
+              hover == i && "bg-green-500 text-black"
+            } ${hover >= 8 && i < hover - 8 && "hidden"}`}
           >
             {data.name}
           </span>
         );
       })}
-      {/* {contentState.map((data, i) => {
-        if ()
-        
-      })} */}
     </div>
   );
 };

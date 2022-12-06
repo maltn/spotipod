@@ -69,10 +69,7 @@ module.exports = {
         screen: "100vw",
       },
       colors: {
-        darker: "#141714",
-        dark: "#3A7563",
-        light: "#59A985",
-        lighter: "#E6D3A7",
+        "black15": "rgb(15,15,15)"
       },
       screens: {
         xs: "480px",

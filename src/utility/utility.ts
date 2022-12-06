@@ -11,6 +11,18 @@ function findNestedObj(entireObj: IItem, keyToFind: string, valToFind: any): IIt
   return foundObj ? foundObj : entireObj;
 };
 
+const findParent = (obj: IItem, value: IItem) => {
+  if(obj.items.includes(value)) {
+    return obj
+  } else if(obj.items) {
+    for(let i = 0; i < obj.items.length; i++) {
+      const result = findParent(obj.items[i], value)
+      if (result) return result
+    }
+  }
+  return null
+}
+
 let updateNestedByIdentifier = (name:string, val: any, obj: IItem) => {
   // console.log(`Currently: "${obj.name}" Looking: ${name}`)
   if (obj.name == name) {
@@ -22,4 +34,4 @@ let updateNestedByIdentifier = (name:string, val: any, obj: IItem) => {
   }
 };
 
-export {findNestedObj, updateNestedByIdentifier}
+export {findNestedObj, updateNestedByIdentifier, findParent}
