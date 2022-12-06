@@ -18,49 +18,65 @@ const Menu = () => {
           {
             name: "Discover Weekly",
             items: [
-              { name: "Song 1" },
-              { name: "Song 2" },
-              { name: "Song 3" },
-              { name: "Song 4" },
-              { name: "Song 5" },
-              { name: "Song 6" },
-              { name: "Song 7" },
-              { name: "Song 8" },
-              { name: "Song 9" },
-              { name: "Song 10" },
-              { name: "Song 11" },
-              { name: "Song 12" },
-              { name: "Song 13" },
-              { name: "Song 14" },
-              { name: "Song 15" },
-              { name: "Song 16" },
-              { name: "Song 17" },
-              { name: "Song 18" },
-              { name: "Song 19" },
-              { name: "Song 20" },
+              { name: "Song 1", type: "song" },
+              { name: "Song 2", type: "song" },
+              { name: "Song 3", type: "song" },
+              { name: "Song 4", type: "song" },
+              { name: "Song 5", type: "song" },
+              { name: "Song 6", type: "song" },
+              { name: "Song 7", type: "song" },
+              { name: "Song 8", type: "song" },
+              { name: "Song 9", type: "song" },
+              { name: "Song 10", type: "song" },
+              { name: "Song 11", type: "song" },
+              { name: "Song 12", type: "song" },
+              { name: "Song 13", type: "song" },
+              { name: "Song 14", type: "song" },
+              { name: "Song 15", type: "song" },
+              { name: "Song 16", type: "song" },
+              { name: "Song 17", type: "song" },
+              { name: "Song 18", type: "song" },
+              { name: "Song 19", type: "song" },
+              { name: "Song 20", type: "song" },
             ],
           },
           {
             name: "Indie",
-            items: [{ name: "Song 1" }, { name: "Song 2" }, { name: "Song 3" }],
+            items: [
+              { name: "Song 1", type: "song" },
+              { name: "Song 2", type: "song" },
+              { name: "Song 3", type: "song" },
+            ],
           },
           {
             name: "Alternative",
-            items: [{ name: "Song 1" }, { name: "Song 2" }, { name: "Song 3" }],
+            items: [
+              { name: "Song 1", type: "song" },
+              { name: "Song 2", type: "song" },
+              { name: "Song 3", type: "song" },
+            ],
           },
           {
             name: "Rap",
-            items: [{ name: "Song 1" }, { name: "Song 2" }, { name: "Song 3" }],
+            items: [
+              { name: "Song 1", type: "song" },
+              { name: "Song 2", type: "song" },
+              { name: "Song 3", type: "song" },
+            ],
           },
           {
             name: "Kpop",
-            items: [{ name: "Song 1" }, { name: "Song 2" }, { name: "Song 3" }],
+            items: [
+              { name: "Song 1", type: "song" },
+              { name: "Song 2", type: "song" },
+              { name: "Song 3", type: "song" },
+            ],
           },
         ],
       },
       {
         name: "Settings",
-        items: [{ name: "Fetch data" }],
+        items: [{ name: "Fetch data", type: "setting" }],
       },
     ],
   });
@@ -97,8 +113,17 @@ const Menu = () => {
     }
     if (e.key == "Enter") {
       //SELECT
-      if (!contentRendererRef.current.items[hoverRef.current].items) return;
-      setContentRenderer(contentRendererRef.current.items[hoverRef.current]);
+      const content = contentRendererRef.current.items[hoverRef.current];
+      if (!contentRendererRef.current.items[hoverRef.current].items) {
+        //button
+        const event = new CustomEvent("button_press", {
+          detail: { name: content.name, type: content.type },
+        } as CustomEventInit);
+        document.dispatchEvent(event);
+
+        return;
+      }
+      setContentRenderer(content);
       setHover(0);
     }
     if (e.key == "Backspace") {

@@ -1,6 +1,13 @@
 interface IItem {
+  id?: string,
   name: string;
   items?: IItem[];
+  type?: string
 }
 
-export type {IItem}
+interface IButtonEventPayload {
+  name: string,
+  type: string | undefined
+}
+
+export type {IItem, IButtonEventPayload}
