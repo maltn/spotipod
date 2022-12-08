@@ -1,4 +1,5 @@
 import { k } from "@tauri-apps/api/event-2a9960e7";
+import { invoke } from "@tauri-apps/api/tauri";
 import _ from "lodash";
 import { useEffect, useRef, useState } from "react";
 import { IItem } from "../utility/interfaces";
@@ -82,12 +83,17 @@ const Menu = () => {
   });
 
   const [contentRenderer, _setContentRenderer] = useState<IItem>(contentState);
+  const contentStateRef = useRef(contentState);
   const contentRendererRef = useRef(contentRenderer);
   const [hover, _setHover] = useState(0);
   const hoverRef = useRef(hover);
   const setHover = (payload: number) => {
     hoverRef.current = payload;
     _setHover(payload);
+  };
+  const setContentState = (payload: IItem) => {
+    contentStateRef.current = payload;
+    _setContentState(payload);
   };
   const setContentRenderer = (payload: IItem) => {
     contentRendererRef.current = payload;
@@ -129,37 +135,61 @@ const Menu = () => {
     if (e.key == "Backspace") {
       //BACK
       if (contentRendererRef.current.name == "Top") return;
-      const result = findParent(contentState, contentRendererRef.current);
+      const result = findParent(
+        contentStateRef.current,
+        contentRendererRef.current
+      );
       setContentRenderer(result);
       setHover(0);
     }
   };
 
   useEffect(() => {
+    (async () => {
+      const temp: string = await invoke("read_spotify_data");
+      // console.log(temp);
+      if (temp.length > 1) {
+        const spotifyData: IItem = JSON.parse(temp as string);
+        setContentState(spotifyData);
+        setContentRenderer(spotifyData);
+      }
+    })();
+
     document.addEventListener("keydown", inputManager);
     return () => {
       document.removeEventListener("keydown", inputManager);
     };
   }, []);
 
-  const getRenderObj = (obj: IItem): IItem[] => {
-    const res = findNestedObj(obj, "selected", true);
-    if (res) return res.items;
-    return obj.items;
-  };
-
   return (
     <div>
       {contentRenderer.items.map((data, i) => {
         return (
-          <span
+          <div
             key={i}
-            className={`block pl-1 mr-1 rounded-sm ${
-              hover == i && "bg-green-500 text-black"
-            } ${hover >= 8 && i < hover - 8 && "hidden"}`}
+            className={`block pl-1 mr-1 rounded-sm whitespace-nowrap h-6 ${
+              data.type == "song" && "h-[26px]"
+            } relative mb-2 ${hover == i && "bg-green-500 text-black"} ${
+              hover >= 5 && i < hover - 5 && "hidden"
+            }`}
           >
-            {data.name}
-          </span>
+            <span
+              className={`block ${
+                data.type == "song" && "absolute bottom-[5px]"
+              }`}
+            >
+              {data.type == "song" ? data.name.split(" - ")[1] : data.name}
+            </span>
+            {data.type == "song" && (
+              <span
+                className={`block text-2xs mb-2 ml-[1px] absolute top-[15px] ${
+                  hover == i ? "text-black" : "text-green-800"
+                }`}
+              >
+                {data.name.split(" - ")[0]}
+              </span>
+            )}
+          </div>
         );
       })}
     </div>

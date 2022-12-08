@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { BsWifiOff, BsWifi } from "react-icons/bs";
 import { UnlistenFn, listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/tauri";
+import { imageBytesToBase64 } from "../utility/utility";
+import { usePlayerData } from "../utility/spotify";
 
 const Battery = ({ percentage }: { percentage: string }) => {
   const percentageNum = parseInt(percentage.replaceAll(/[^0-9]/g, ""));
@@ -52,9 +54,7 @@ const Internet = () => {
 
 const StatusBar = () => {
   const temp = async () => {
-    const resp = await invoke("write_spotify_data", { data: "haha" });
-
-    console.log(resp);
+    const response = await invoke("test_command");
   };
 
   return (

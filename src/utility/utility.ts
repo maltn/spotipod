@@ -34,4 +34,15 @@ let updateNestedByIdentifier = (name:string, val: any, obj: IItem) => {
   }
 };
 
-export {findNestedObj, updateNestedByIdentifier, findParent}
+const imageBytesToBase64 = (data: Uint8Array) => {
+  let base64String = "";
+  for (var i = 0; i < data.length; i++) {
+    base64String += String.fromCharCode(data[i]);
+  }
+  const base64 = "data:image/jpeg;base64," + window.btoa(base64String);
+  return base64
+}
+
+function fmtMSS(s){return(s-(s%=60))/60+(9<s?':':':0')+s}
+
+export {findNestedObj, updateNestedByIdentifier, findParent, imageBytesToBase64, fmtMSS}

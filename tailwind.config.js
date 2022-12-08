@@ -108,6 +108,8 @@ module.exports = {
       },
     },
     fontSize: {
+      "3xs": ".25rem",
+      "2xs": ".5rem",
       xs: ".75rem",
       sm: ".875rem",
       tiny: ".875rem",

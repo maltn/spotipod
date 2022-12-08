@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/tauri";
 import { IItem } from "./interfaces";
+import create from 'zustand'
 
 const getKey = async () => {
   const internetStatus = await invoke("internet_status");
@@ -58,7 +59,24 @@ const getPlaylistsItems = async (key, playlists) => {
     }).then(x => x.json())
 
     const tracks = songs["items"].map(track => {
-      return {name: track.track.artists[0].name + " - " + track.track.name, type: "song"}
+      const temp = []
+      for (let i = 0; i < track.track.artists.length; i++) {
+        const artist = track.track.artists[i].name;
+
+        if(track["track"]["name"].includes(artist) && track["track"]["name"].includes("feat.") && temp.length > 0) {
+          console.log(track["track"]["name"], artist, track["track"]["name"].includes(artist))
+          continue;
+        }
+        else {
+          temp.push(artist)
+        }
+      }
+      const artists = temp.join(", ")
+
+      let trackName: string = track.track.name
+      trackName = trackName.replaceAll("/", "")
+
+      return {name: artists + " - " + trackName, type: "song"}
     })
 
     data.push({...playlist, items: tracks})
@@ -83,7 +101,30 @@ const saveSpotifyData = async (spotifyData: IItem[]) => {
   }
 
   data.items[0].items = spotifyData
+
+  console.log(JSON.stringify(data))
+
   await invoke("write_spotify_data", { data: JSON.stringify(data) });
 }
 
-export { getKey, getPlaylists, getPlaylistsItems, saveSpotifyData }
+interface IPlayerData {
+  image: string | null,
+  title: string | null,
+  artist: string | null,
+  length: number | null,
+  duration: number | null,
+  setData: (data: IPlayerData) => void,
+  setDuration: (time: number) => void
+}
+
+const usePlayerData = create<IPlayerData>((set) => ({
+  image: null,
+  title: null,
+  artist: null,
+  length: null,
+  duration: null,
+  setData: (data: IPlayerData) => set(() => ({image: data.image, title: data.title, artist: data.artist, length: data.length, duration: 0})),
+  setDuration: (time) => set(() => ({ duration: time }))
+}))
+
+export { getKey, getPlaylists, getPlaylistsItems, saveSpotifyData, usePlayerData }
