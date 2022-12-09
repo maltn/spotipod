@@ -95,7 +95,7 @@ const saveSpotifyData = async (spotifyData: IItem[]) => {
       },
       {
         name: "Settings",
-        items: [{ name: "Fetch Data", type: "setting" }],
+        items: [{ name: "Toggle Shuffle", type: "setting" }, { name: "Toggle Repeat", type: "setting" }, { name: "Fetch Data", type: "setting" }],
       },
     ],
   }

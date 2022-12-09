@@ -142,6 +142,9 @@ const Menu = () => {
       setContentRenderer(result);
       setHover(0);
     }
+    if (e.code == "Space") {
+      invoke("play_pause_track");
+    }
   };
 
   useEffect(() => {

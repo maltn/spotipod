@@ -5,11 +5,17 @@
 
 use lofty::{read_from_path, AudioFile};
 use reqwest::StatusCode;
+use rodio::source::{SineWave, Source};
+use rodio::{Decoder, OutputStream, Sink};
 use std::collections::HashMap;
 use std::fs::{File, OpenOptions};
-use std::io::Write;
+use std::io::{BufReader, Write};
+use std::sync::mpsc::{channel, Sender};
+use std::sync::{Arc, Mutex};
 use std::{env, fs};
+use tauri::Manager;
 
+struct State(Mutex<Option<Arc<Sink>>>, i32);
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn spotify_env() -> HashMap<String, String> {
@@ -78,22 +84,63 @@ fn get_track_info(track: &str) -> (u64, Vec<u8>) {
 }
 
 #[tauri::command]
-fn test_command() {
-    println!(
-        "{:?}",
-        home::home_dir().unwrap().to_str().unwrap().to_owned()
-    )
+fn play_track(track: String, app_handle: tauri::AppHandle, state: tauri::State<State>) {
+    println!("Trying to play {}", track);
+
+    let mut state_value = state.0.lock().unwrap();
+    match state_value.as_ref() {
+        Some(sink) => sink.stop(),
+        None => (),
+    };
+    let (tx, rx) = channel();
+    std::thread::spawn(move || {
+        let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+        let path =
+            home::home_dir().unwrap().to_str().unwrap().to_owned() + "\\music\\" + &track + ".mp3";
+        let file = BufReader::new(fs::File::open(path).unwrap());
+        let source = Decoder::new(file).unwrap();
+        let sink = Arc::new(Sink::try_new(&stream_handle).unwrap());
+        sink.append(source);
+        tx.send(Arc::clone(&sink)).unwrap();
+        app_handle.emit_all("handle_counter", "start").unwrap();
+        sink.sleep_until_end();
+    });
+
+    *state_value = Some(rx.recv().unwrap());
+}
+
+#[tauri::command]
+fn test_command(path: String, state: tauri::State<State>) {
+    println!("{}", path);
+}
+
+#[tauri::command]
+fn play_pause_track(app_handle: tauri::AppHandle, state: tauri::State<State>) {
+    let state_value = state.0.lock().unwrap();
+    let sink = state_value.as_ref();
+    if let Some(sink) = sink {
+        if sink.is_paused() {
+            sink.play();
+            app_handle.emit_all("handle_counter", "play").unwrap();
+        } else {
+            sink.pause();
+            app_handle.emit_all("handle_counter", "pause").unwrap();
+        }
+    }
 }
 
 fn main() {
     tauri::Builder::default()
+        .manage(State(Mutex::new(Option::None), 0))
         .invoke_handler(tauri::generate_handler![
             spotify_env,
             internet_status,
             write_spotify_data,
             read_spotify_data,
             get_track_info,
-            test_command
+            test_command,
+            play_pause_track,
+            play_track
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

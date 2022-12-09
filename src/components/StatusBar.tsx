@@ -54,13 +54,18 @@ const Internet = () => {
 
 const StatusBar = () => {
   const temp = async () => {
-    const response = await invoke("test_command");
+    const response = await invoke("test_command", { path: "../test.mp3" });
+  };
+
+  const temp2 = async () => {
+    const response = await invoke("test_command_2");
   };
 
   return (
     <div className="w-full bg-black h-4 relative flex items-center justify-between">
       <Internet />
       <div onClick={temp} className="w-4 h-4 bg-red-500"></div>
+      <div onClick={temp2} className="w-4 h-4 bg-blue-500"></div>
       <Battery percentage="w-[71%]" />
     </div>
   );

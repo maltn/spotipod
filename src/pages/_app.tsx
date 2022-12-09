@@ -21,6 +21,10 @@ export default function MyApp({ Component, pageProps }: AppProps) {
     });
     const image = imageBytesToBase64(resp[1]);
 
+    const playbackResponse: [number, Uint8Array] = await invoke("play_track", {
+      track: payload.name,
+    });
+
     playerData.setData({
       ...playerData,
       image,
